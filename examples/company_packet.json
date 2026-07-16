@@ -1,0 +1,19 @@
+{
+  "company": "Example Staffing Co",
+  "buyer_role": "Head of Finance Operations",
+  "problem_focus": "timesheet-to-invoice exceptions",
+  "sources": [
+    {
+      "source_id": "S1",
+      "title": "Public job description",
+      "url": "https://example.com/jobs/finance-ops",
+      "text": "The finance operations team resolves billing queries, validates timesheets, and coordinates with account managers. The role tracks invoice accuracy and aging."
+    },
+    {
+      "source_id": "S2",
+      "title": "Public help article",
+      "url": "https://example.com/help/timesheets",
+      "text": "Approved timesheets are required before invoices are generated. Corrections may require client approval."
+    }
+  ]
+}

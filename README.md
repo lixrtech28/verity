@@ -1,12 +1,21 @@
 # Opportunity Intelligence Agent
 
-A local-first, evidence-disciplined agent that converts a human-approved set of public company sources into supported facts, labeled hypotheses, respectful outreach drafts, discovery questions, and an explicit human-approval record.
+A local-first, evidence-disciplined research tool for turning a human-approved set of public company sources into traceable opportunity signals.
 
-## Current build
+The project is deliberately built around a simple rule: **evidence first, inference second, action only after human approval.**
 
-The first executable module extracts explicit pain signals from approved source text while preserving source URLs and labeling generated opportunities as hypotheses. Nothing is presented as verified without human approval.
+## What it does today
 
-### Run
+The v0.1 core:
+
+- extracts explicit pain signals from approved source text
+- preserves source URLs with findings
+- separates observed signals from generated hypotheses
+- produces reviewable opportunity records
+- keeps external actions behind an explicit human-approval boundary
+- runs without a model or hosted service in the core extraction path
+
+## Quick start
 
 ```bash
 python -m src.opportunity_intelligence <<'JSON'
@@ -14,19 +23,35 @@ python -m src.opportunity_intelligence <<'JSON'
 JSON
 ```
 
-### Test
+Run tests:
 
 ```bash
 python -m pytest -q
 ```
 
-## Design principles
+## Why this exists
 
-- Public, human-approved sources only.
-- Evidence stays attached to findings.
-- Facts and hypotheses remain separate.
-- Generated conclusions require human approval.
-- Local-first execution for the core extraction pipeline.
+Market and company research produces large amounts of fragmented public information, but useful opportunities are often buried inside repetitive operational complaints, product friction, workflow descriptions, and buyer language.
+
+This project is an experiment in making that evidence computable without collapsing facts and model-generated interpretation into the same object.
+
+## Architecture direction
+
+```text
+approved sources
+      ↓
+normalization / deduplication
+      ↓
+source-backed claims
+      ↓
+contradiction checks
+      ↓
+opportunity hypotheses
+      ↓
+human review
+      ↓
+research / discovery artifacts
+```
 
 ## Roadmap
 
@@ -36,3 +61,12 @@ python -m pytest -q
 4. Opportunity scoring with explicit assumptions.
 5. Reviewable outreach and discovery artifacts.
 6. Provider adapters behind explicit interfaces.
+7. Evaluation suite for extraction quality and provenance integrity.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Security-sensitive reports should follow [SECURITY.md](SECURITY.md).
+
+## License
+
+MIT. See [LICENSE](LICENSE).

@@ -1,8 +1,8 @@
 # VERITY
 
-### Evidence infrastructure for AI research
+### Evidence infrastructure for auditable AI research
 
-VERITY turns research inputs into **traceable claims, explicit evidence, separated hypotheses, relationship graphs, transparent quality signals, and reviewable decisions**.
+VERITY turns research inputs into **traceable claims, explicit evidence, relationship graphs, transparent quality signals, deterministic evaluation reports, and reproducible research bundles**.
 
 > **Evidence first. Inference second. Action only after review.**
 
@@ -17,17 +17,17 @@ research inputs
       ↓
 normalized evidence
       ↓
-atomic claims ────────┐
-      ↓                │
-provenance             │
-      ↓                │
-quality signals        │
-      ↓                │
-relationship graph ←───┘
-  │       │
-  │       └── supports / contradicts / derived_from
-  ↓
-hypotheses
+atomic claims ─────────────┐
+      ↓                    │
+provenance                 │
+      ↓                    │
+quality signals            │
+      ↓                    │
+relationship graph ←───────┘
+      ↓
+structural evaluation
+      ↓
+reproducible bundle
       ↓
 human review
       ↓
@@ -38,45 +38,72 @@ The core is deterministic and works without an LLM or hosted service.
 
 ## What is implemented
 
-### 1. Traceable claims
+### Traceable claims
 
-Every extracted claim gets a stable content-derived ID and retains its source ID and URL. This makes downstream records referential instead of relying on model-generated labels.
+Every extracted claim gets a stable content-derived ID and retains its source ID and URL.
 
-### 2. Evidence graph
+### Evidence graph
 
-`EvidenceGraph` stores explicit relationships between research objects:
+`EvidenceGraph` stores explicit relationships:
 
 - `supports`
 - `contradicts`
 - `derived_from`
 - `related_to`
 
-VERITY does not silently infer truth from a graph edge. Relationships are explicit inputs that can be reviewed or produced by a separate evaluation/model layer.
+VERITY does not silently infer truth from an edge. Relationships remain explicit and reviewable.
 
-### 3. Transparent quality scoring
+### Transparent quality scoring
 
-`score_evidence()` exposes structural signals for completeness, specificity, and provenance. The score is deliberately a heuristic, not a truth detector. Every component and rationale is inspectable and replaceable.
+`score_evidence()` exposes structural signals for completeness, specificity, and provenance. It is a heuristic, not a truth detector.
 
-### 4. JSONL streaming
+### Deterministic evaluation
+
+`evaluate()` checks structural integrity across evidence, claims, and graph relationships. It reports:
+
+- missing source references
+- unknown graph nodes
+- low-quality sources
+- explicit contradictions
+- claims without support/derivation edges
+
+The result is `pass`, `review`, or `fail`. A `review` result is not a claim that the research is false; it means a human should inspect the flagged conditions.
+
+### Reproducible research bundles
+
+`write_bundle()` writes canonical JSON artifacts plus a manifest containing SHA-256 hashes. The format intentionally excludes machine-specific paths and generated timestamps so identical inputs produce stable artifact hashes.
+
+```text
+bundle/
+├── evidence.json
+├── claims.json
+├── graph.json
+├── quality.json       # optional
+├── evaluation.json    # optional
+└── manifest.json
+```
+
+See [`docs/RESEARCH_BUNDLES.md`](docs/RESEARCH_BUNDLES.md).
+
+### JSONL streaming
 
 Evidence can be read from and written to JSONL for batch pipelines and agent workflows without requiring a database or hosted service.
 
-### 5. Deterministic CLI
+### CLI
 
 ```bash
-# JSON evidence document
+# Build claims
 verity examples/demo.json
 
-# JSONL evidence stream
-verity evidence.jsonl --jsonl
-
-# Include transparent quality signals
+# Include quality signals
 verity examples/demo.json --quality
+
+# Evaluate the evidence graph
+verity examples/demo.json --quality --evaluate
+
+# Produce a reproducible bundle
+verity examples/demo.json --quality --evaluate --bundle ./bundle
 ```
-
-### 6. Human-review boundary
-
-The library does not silently take external actions. Model adapters and automation can be layered on top, but the evidence model remains inspectable.
 
 ## Quick start
 
@@ -84,13 +111,13 @@ Requires Python 3.11+.
 
 ```bash
 pip install -e .
-verity examples/demo.json --quality
+verity examples/demo.json --quality --evaluate
 ```
 
 Or use the library directly:
 
 ```python
-from verity import Evidence, build_claims, score_evidence
+from verity import Evidence, EvidenceGraph, Relation, build_claims, evaluate
 
 item = Evidence(
     source_id="source-1",
@@ -100,8 +127,9 @@ item = Evidence(
 )
 
 result = build_claims([item])
-print(result.to_json())
-print(score_evidence(item).to_json())
+graph = EvidenceGraph([Relation("source-1", result.claims[0].claim_id, "supports")])
+
+print(evaluate([item], result.claims, graph).to_json())
 ```
 
 Run the test suite:
@@ -119,12 +147,13 @@ VERITY is an experiment in making that primitive open, small, composable, and au
 ## Design principles
 
 - **Provenance is data.** Every claim points back to its source.
-- **Claims are not hypotheses.** Observed evidence and interpretation are separate types.
-- **Relationships are explicit.** A contradiction or support edge is recorded, not hidden inside prose.
-- **Scores are inspectable.** Heuristics expose their assumptions instead of pretending to be certainty.
+- **Claims are not hypotheses.** Observation and interpretation are separate.
+- **Relationships are explicit.** Support and contradiction are recorded, not hidden inside prose.
+- **Evaluation is structural.** The evaluator finds integrity problems; it does not pretend to establish truth.
+- **Scores are inspectable.** Heuristics expose their assumptions.
 - **Models are replaceable.** LLMs can assist; they are not the source of truth.
 - **Human review is explicit.** The library never silently takes external action.
-- **Reproducibility matters.** Inputs, outputs, IDs, and assumptions should be inspectable.
+- **Reproducibility matters.** Canonical artifacts and hashes make research packages inspectable.
 - **Security is part of research integrity.** No covert collection, access-control bypassing, fabricated respondents, or synthetic evidence presented as human evidence.
 
 ## Roadmap
@@ -137,17 +166,18 @@ VERITY is an experiment in making that primitive open, small, composable, and au
 - [x] Evidence relationship graph
 - [x] Explicit evidence-quality signals
 - [x] JSONL streaming interface
+- [x] Structural evaluation engine
+- [x] Reproducible research bundles
 - [x] Tests and CI
-- [ ] Claim-to-claim contradiction detection
+- [ ] Claim-to-claim semantic contradiction detection
 - [ ] Pluggable LLM adapters with provenance-preserving outputs
 - [ ] Public evaluation suite for provenance and extraction accuracy
 - [ ] GitHub Action for evidence checks
 - [ ] Adapters for common research-agent frameworks
-- [ ] Versioned evidence snapshots and reproducible research bundles
 
 ## Project status
 
-**Early-stage open source.** The data model is being developed in public. The project favors small deterministic primitives over a large opaque agent framework.
+**Early-stage open source.** The project favors small deterministic primitives over a large opaque agent framework.
 
 Contributions, criticism, reproducible examples, and failure cases are welcome.
 

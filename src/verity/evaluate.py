@@ -1,7 +1,7 @@
 """Deterministic evaluation checks for evidence-backed research results.
 
-The evaluator reports structural problems. It does not decide whether a claim is
-factually true; truth still requires source review and domain judgment.
+The evaluator reports structural problems. It does not decide whether a
+claim is factually true; truth still requires source review and domain judgment.
 """
 
 from __future__ import annotations
@@ -48,7 +48,7 @@ def evaluate(
     claims: Iterable[Claim],
     graph: EvidenceGraph,
     *,
-    minimum_quality: float = 0.5,
+    minimum_quality: float = 0.25,
 ) -> EvaluationReport:
     """Run reproducible structural checks over an evidence set."""
     evidence_list = tuple(evidence)

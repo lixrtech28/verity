@@ -12,5 +12,19 @@
       "title": "Example interview",
       "text": "Teams use a spreadsheet workaround because the existing workflow is slow."
     }
+  ],
+  "relations": [
+    {
+      "source": "example-1",
+      "target": "clm_15f113a18473b479",
+      "relation": "supports",
+      "rationale": "The evidence source directly contains the observation represented by the claim."
+    },
+    {
+      "source": "example-2",
+      "target": "clm_26de813e6df2081e",
+      "relation": "supports",
+      "rationale": "The interview source directly contains the observation represented by the claim."
+    }
   ]
 }

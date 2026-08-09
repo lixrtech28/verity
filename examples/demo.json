@@ -1,0 +1,16 @@
+{
+  "evidence": [
+    {
+      "source_id": "example-1",
+      "url": "https://example.com/research",
+      "title": "Example customer research",
+      "text": "Operations teams report that weekly reporting takes hours of manual work."
+    },
+    {
+      "source_id": "example-2",
+      "url": "https://example.com/interview",
+      "title": "Example interview",
+      "text": "Teams use a spreadsheet workaround because the existing workflow is slow."
+    }
+  ]
+}
